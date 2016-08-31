@@ -1,11 +1,15 @@
+/*
+ *  react-autocomplete
+ *  version: 0.1.0
+ */
 import React, { PropTypes } from "react";
 import { FormControl } from "react-bootstrap";
 
 class AutocompleteField extends React.Component {
 	static propTypes = {
-		inputText: PropTypes.string, // default text for the input field
 		items: PropTypes.array.isRequired, // all items of the dropdown before filtering with the input string values
-		onClick: PropTypes.func.isRequired, // triggered when a item on the dropdown is selected
+		inputText: PropTypes.string, // default text for the input field
+		onClick: PropTypes.func, // triggered when a item on the dropdown is selected
 		onChange: PropTypes.func, // triggered every time the input field is changed
 		name: PropTypes.string // name for the input field
 	};
@@ -14,8 +18,9 @@ class AutocompleteField extends React.Component {
 
 		this.highlightedElement = null; // DOM element of the current highlighted element in the dropdown
 		this.state = {
+			minNumChars: 2,
 			selectedValue: this.props.inputText || "", // internal value of the input field,
-			filteredItems: this._filterItems(this.props.inputText), // list of items filtered by input value
+			filteredItems: this._filterItems(this.props.inputText || ""), // list of items filtered by input value
 			highlightedValue: -1, // highlighted value in the dropdown
 			dropdownVisible: false // visibility of the dropdown
 		};
@@ -33,7 +38,9 @@ class AutocompleteField extends React.Component {
 		});
 
 		// calls props onClick callback
-		this.props.onClick(name, id);
+		if (this.props.onClick) {
+			this.props.onClick(name, id);
+		}
 	}
 	/*
 	 * Manages the input field change event
@@ -56,7 +63,9 @@ class AutocompleteField extends React.Component {
 		}
 
 		// calls props onChange callback
-		this.props.onChange(event);
+		if (this.props.onChange) {
+			this.props.onChange(event);
+		}
 	}
 	/*
 	 * Returns a new list of items filtering by the value of the input field
@@ -103,7 +112,7 @@ class AutocompleteField extends React.Component {
 	render() {
 		// set the visibility of the dropdown
 		const filteredItems = this.state.filteredItems,
-			styles = this.state.dropdownVisible && filteredItems.length && this.state.selectedValue.length > 1 ? {display: "inline-block"} : {display: "none"};
+			styles = this.state.dropdownVisible && filteredItems.length && this.state.selectedValue.length > this.state.minNumChars-1 ? {display: "inline-block"} : {display: "none"};
 
 		return (
 			<div className="autocomplete-field">
